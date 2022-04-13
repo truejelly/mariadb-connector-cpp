@@ -39,12 +39,12 @@ SET(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 SET(LIBRARY_NAME "mariadbcpp")
 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/src/Version.h.in
-               ${CMAKE_SOURCE_DIR}/src/Version.h)
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/src/maconncpp.rc.in
-               ${CMAKE_SOURCE_DIR}/src/maconncpp.rc)
-INCLUDE(${CMAKE_SOURCE_DIR}/cmake/SearchLibrary.cmake)
-INCLUDE(${CMAKE_SOURCE_DIR}/cmake/SetValueMacro.cmake)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/Version.h.in
+               ${PROJECT_SOURCE_DIR}/src/Version.h)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/maconncpp.rc.in
+               ${PROJECT_SOURCE_DIR}/src/maconncpp.rc)
+INCLUDE(${PROJECT_SOURCE_DIR}/cmake/SearchLibrary.cmake)
+INCLUDE(${PROJECT_SOURCE_DIR}/cmake/SetValueMacro.cmake)
 
 
 SET (MACPP_SOURCES src/MariaDbDriver.cpp
@@ -364,7 +364,7 @@ IF(WIN32)
 ENDIF()
 
 ### Setting installation paths - should go before C/C subproject sets its own. We need to have control over those
-INCLUDE("${CMAKE_SOURCE_DIR}/cmake/install.cmake")
+INCLUDE("${PROJECT_SOURCE_DIR}/cmake/install.cmake")
 MESSAGE(STATUS "Libraries installation dir: ${INSTALL_LIB_SUFFIX}")
 MESSAGE(STATUS "Authentication Plugins installation dir: ${INSTALL_PLUGINDIR}")
 
@@ -381,14 +381,14 @@ IF(NOT WITH_SSL)
   SET(CONC_WITH_SSL ON)
 ENDIF()
 ### Including C/C subproject
-IF(EXISTS ${CMAKE_SOURCE_DIR}/libmariadb)
+IF(EXISTS ${PROJECT_SOURCE_DIR}/libmariadb)
   IF(GIT_BUILD_SRCPKG)
     # We don't want conn/c (wrong) src pkg to be built.
     SET(GIT_BUILD_SRCPKG FALSE)
     SET(CONNCPP_GIT_BUILD_SRCPKG TRUE)
   ENDIF()
   MESSAGE(STATUS "Running C/C cmake scripts")
-  INCLUDE(${CMAKE_SOURCE_DIR}/cmake/connector_c.cmake)
+  INCLUDE(${PROJECT_SOURCE_DIR}/cmake/connector_c.cmake)
   INSTALL(FILES
           $<TARGET_FILE:libmariadb>
           DESTINATION ${INSTALL_LIBDIR}
@@ -427,16 +427,16 @@ IF(WITH_MSI AND WITH_SIGNCODE)
   MARK_AS_ADVANCED(SIGN_OPTIONS)
 ENDIF()
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/libmariadb/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/libmariadb/include)
 INCLUDE_DIRECTORIES(${CMAKE_BINARY_DIR}/libmariadb/include)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/include/conncpp)
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR}/src)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/include/conncpp)
+INCLUDE_DIRECTORIES(${PROJECT_SOURCE_DIR}/src)
 IF(NOT CMAKE_BUILD_TYPE)
   SET(CMAKE_BUILD_TYPE "RelWithDebInfo")
 ENDIF()
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/src/maconncpp.def.in
-               ${CMAKE_SOURCE_DIR}/src/maconncpp.def)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/src/maconncpp.def.in
+               ${PROJECT_SOURCE_DIR}/src/maconncpp.def)
 
 # Dynamic linking is default on non-Windows
 IF(MARIADB_LINK_DYNAMIC OR NOT WIN32)# OR USE_SYSTEM_INSTALLED_LIB)
@@ -452,14 +452,14 @@ ELSE()
 ENDIF()
 
 IF(WIN32)
-  ADD_LIBRARY(${LIBRARY_NAME} SHARED ${MACPP_SOURCES} ${CMAKE_SOURCE_DIR}/src/maconncpp.def ${CMAKE_SOURCE_DIR}/src/maconncpp.rc)
+  ADD_LIBRARY(${LIBRARY_NAME} SHARED ${MACPP_SOURCES} ${PROJECT_SOURCE_DIR}/src/maconncpp.def ${PROJECT_SOURCE_DIR}/src/maconncpp.rc)
 ELSE()
-#  MESSAGE(STATUS "Version script: ${CMAKE_SOURCE_DIR}/src/maconncpp.def")
+#  MESSAGE(STATUS "Version script: ${PROJECT_SOURCE_DIR}/src/maconncpp.def")
   ADD_LIBRARY(${LIBRARY_NAME} SHARED ${MACPP_SOURCES})
   IF(APPLE)
     SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl")
   ELSE()
-#    SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl,--version-script=${CMAKE_SOURCE_DIR}/src/maconncpp.def")
+#    SET_TARGET_PROPERTIES(${LIBRARY_NAME} PROPERTIES LINK_FLAGS "-Wl,--version-script=${PROJECT_SOURCE_DIR}/src/maconncpp.def")
   ENDIF()
 ENDIF()
 
@@ -475,9 +475,9 @@ IF(WIN32)
       COMMAND ${CMAKE_COMMAND} ARGS -DDRIVER_LIB_DIR=$<TARGET_FILE_DIR:${LIBRARY_NAME}>
                                     -DPLUGINS_LIB_DIR=$<TARGET_FILE_DIR:dialog>
                                     -DPLUGINS_SUBDIR_NAME=${MARIADB_DEFAULT_PLUGINS_SUBDIR}
-                                    -DFILE_IN=${CMAKE_SOURCE_DIR}/wininstall/binaries_dir.xml.in
-                                    -DFILE_OUT=${CMAKE_SOURCE_DIR}/wininstall/binaries_dir.xml
-                                    -P ${CMAKE_SOURCE_DIR}/cmake/ConfigureFile.cmake
+                                    -DFILE_IN=${PROJECT_SOURCE_DIR}/wininstall/binaries_dir.xml.in
+                                    -DFILE_OUT=${PROJECT_SOURCE_DIR}/wininstall/binaries_dir.xml
+                                    -P ${PROJECT_SOURCE_DIR}/cmake/ConfigureFile.cmake
                        )
     ADD_SUBDIRECTORY(wininstall)
   ENDIF()
@@ -495,12 +495,12 @@ ELSE()
   MESSAGE(STATUS "License file installed to ${INSTALL_LICENSEDIR}")
   MESSAGE(STATUS "Public API header files installed to ${INSTALL_INCLUDEDIR}")
   INSTALL(FILES
-          ${CMAKE_SOURCE_DIR}/README
+          ${PROJECT_SOURCE_DIR}/README
           DESTINATION
           ${INSTALL_DOCDIR}
           COMPONENT Documentation)
   INSTALL(FILES
-          ${CMAKE_SOURCE_DIR}/COPYING
+          ${PROJECT_SOURCE_DIR}/COPYING
           DESTINATION
           ${INSTALL_LICENSEDIR}
           COMPONENT Documentation)
@@ -515,8 +515,8 @@ IF(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/test/CMakeLists.txt")
 	  COMMAND ${CMAKE_COMMAND} ARGS -E copy $<TARGET_FILE:libmariadb> test)
 ENDIF()
 
-CONFIGURE_FILE(${CMAKE_SOURCE_DIR}/install_test/CMakeLists.txt.in
-               ${CMAKE_SOURCE_DIR}/install_test/CMakeLists.txt @ONLY)
+CONFIGURE_FILE(${PROJECT_SOURCE_DIR}/install_test/CMakeLists.txt.in
+               ${PROJECT_SOURCE_DIR}/install_test/CMakeLists.txt @ONLY)
 # Packaging
 INCLUDE(cmake/packaging.cmake)
 MESSAGE(STATUS "Package Name: ${CPACK_PACKAGE_FILE_NAME}")
